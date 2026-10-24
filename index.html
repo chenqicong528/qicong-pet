@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>柒葱桌宠 · 网页试玩版</title>
+<style>
+  :root {
+    --bg1: #12121e;
+    --bg2: #1c1630;
+    --panel: rgba(28, 26, 46, 0.72);
+    --panel-border: rgba(255, 255, 255, 0.09);
+    --text: #e8e6f2;
+    --text-dim: #9d99b5;
+    --pink: #f7a8c4;
+    --pink-deep: #e878a8;
+    --green: #7fd8a0;
+    --blue: #7fb8f0;
+    --yellow: #f5d97a;
+    --taskbar: rgba(18, 16, 32, 0.92);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+  html, body { width: 100%; height: 100%; overflow: hidden; }
+  body {
+    font-family: "Microsoft YaHei UI", "PingFang SC", sans-serif;
+    background: radial-gradient(1200px 700px at 70% 20%, var(--bg2), var(--bg1));
+    color: var(--text);
+    cursor: default;
+  }
+
+  /* ---------- 背景装饰 ---------- */
+  .stars { position: fixed; inset: 0; pointer-events: none; }
+  .star { position: absolute; border-radius: 50%; background: #fff; opacity: .35; animation: twinkle 3s infinite ease-in-out; }
+  @keyframes twinkle { 0%,100% { opacity:.15; } 50% { opacity:.5; } }
+
+  /* ---------- 顶栏 ---------- */
+  .topbar {
+    position: fixed; top: 0; left: 0; right: 0; height: 52px;
+    display: flex; align-items: center; gap: 14px; padding: 0 22px;
+    background: rgba(16, 14, 28, 0.6); backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--panel-border); z-index: 50;
+  }
+  .topbar .logo { width: 34px; height: 34px; border-radius: 10px; object-fit: cover; }
+  .topbar .title { font-size: 16px; font-weight: 600; letter-spacing: .5px; }
+  .topbar .sub { font-size: 12px; color: var(--text-dim); margin-top: 1px; }
+  .topbar .spacer { flex: 1; }
+  .topbar .ver { font-size: 12px; color: var(--text-dim); }
+  .topbar a.github {
+    font-size: 12px; color: var(--pink); text-decoration: none;
+    border: 1px solid rgba(247,168,196,.35); padding: 5px 12px; border-radius: 999px;
+    transition: all .2s;
+  }
+  .topbar a.github:hover { background: rgba(247,168,196,.12); }
+
+  /* ---------- 状态面板 ---------- */
+  .panel {
+    position: fixed; top: 68px; right: 18px; width: 238px; z-index: 40;
+    background: var(--panel); backdrop-filter: blur(14px);
+    border: 1px solid var(--panel-border); border-radius: 16px;
+    padding: 14px 16px 12px;
+  }
+  .panel .lv-row { display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px; }
+  .panel .lv-row .lv { font-size: 20px; font-weight: 700; color: var(--pink); }
+  .panel .lv-row .name { font-size: 13px; color: var(--text); font-weight: 600; }
+  .panel .lv-row .aff { margin-left: auto; font-size: 11px; color: var(--text-dim); }
+  .exp-bar { height: 6px; border-radius: 3px; background: rgba(255,255,255,.08); overflow: hidden; margin-bottom: 12px; }
+  .exp-bar i { display: block; height: 100%; width: 0%; background: linear-gradient(90deg, var(--pink), var(--pink-deep)); transition: width .3s; }
+  .stat { margin-bottom: 9px; }
+  .stat .row { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-dim); margin-bottom: 3px; }
+  .stat .row b { color: var(--text); font-weight: 600; }
+  .bar { height: 7px; border-radius: 4px; background: rgba(255,255,255,.08); overflow: hidden; }
+  .bar i { display: block; height: 100%; width: 50%; border-radius: 4px; transition: width .3s; }
+  .bar.hunger i { background: var(--yellow); }
+  .bar.mood i { background: var(--pink); }
+  .bar.hyg i { background: var(--blue); }
+  .bar.health i { background: var(--green); }
+
+  /* ---------- 任务栏 ---------- */
+  .taskbar {
+    position: fixed; left: 0; right: 0; bottom: 0; height: 52px; z-index: 30;
+    background: var(--taskbar); backdrop-filter: blur(12px);
+    border-top: 1px solid var(--panel-border);
+    display: flex; align-items: center; padding: 0 14px; gap: 10px;
+  }
+  .tb-start {
+    width: 36px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center;
+    font-size: 17px; background: rgba(255,255,255,.06); border: 1px solid var(--panel-border);
+  }
+  .tb-icons { display: flex; gap: 8px; margin-left: 4px; }
+  .tb-icons span {
+    width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    font-size: 15px; background: rgba(255,255,255,.05); border: 1px solid var(--panel-border); opacity: .8;
+  }
+  .tb-clock { margin-left: auto; text-align: right; font-size: 12px; color: var(--text-dim); line-height: 1.5; padding-right: 8px; }
+  .tb-clock b { color: var(--text); font-size: 13px; font-weight: 600; }
+
+  /* ---------- 操作按钮 ---------- */
+  .actions {
+    position: fixed; left: 16px; bottom: 66px; z-index: 35;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .actions .row { display: flex; gap: 8px; }
+  .btn {
+    padding: 8px 14px; border-radius: 999px; font-size: 12.5px; cursor: pointer;
+    background: var(--panel); border: 1px solid var(--panel-border); color: var(--text);
+    backdrop-filter: blur(10px); transition: all .18s; font-family: inherit;
+  }
+  .btn:hover { border-color: var(--pink); color: var(--pink); transform: translateY(-2px); }
+  .btn.active { background: rgba(247,168,196,.16); border-color: var(--pink); color: var(--pink); }
+  .food-pop {
+    display: none; gap: 8px; padding: 8px 10px;
+    background: var(--panel); border: 1px solid var(--panel-border); border-radius: 14px;
+    backdrop-filter: blur(10px);
+  }
+  .food-pop.show { display: flex; }
+  .food { font-size: 20px; cursor: pointer; padding: 4px 6px; border-radius: 10px; transition: transform .15s; }
+  .food:hover { transform: scale(1.3) rotate(-8deg); }
+  .skins { display: none; gap: 6px; align-items: center; padding: 8px 10px;
+    background: var(--panel); border: 1px solid var(--panel-border); border-radius: 14px; backdrop-filter: blur(10px); }
+  .skins.show { display: flex; }
+  .skin-dot { width: 22px; height: 22px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: all .15s; }
+  .skin-dot:hover { transform: scale(1.2); }
+  .skin-dot.active { border-color: #fff; }
+  .skin-dot.default { background: linear-gradient(135deg, #f7a8c4, #b8c8f0); }
+
+  /* ---------- 桌宠 ---------- */
+  #pet {
+    position: fixed; z-index: 20; cursor: grab;
+    will-change: transform; touch-action: none;
+  }
+  #pet.dragging { cursor: grabbing; }
+  #pet img { display: block; pointer-events: none; transform: translate(-50%, -100%); }
+  #pet.wobble img { animation: wobble .5s ease-in-out; }
+  @keyframes wobble {
+    0%,100% { transform: translate(-50%,-100%) rotate(0deg); }
+    25% { transform: translate(-50%,-100%) rotate(-4deg); }
+    75% { transform: translate(-50%,-100%) rotate(4deg); }
+  }
+
+  /* 气泡 */
+  .bubble {
+    position: fixed; z-index: 45; max-width: 240px;
+    background: rgba(255,255,255,.94); color: #333;
+    font-size: 13px; line-height: 1.55; padding: 9px 13px;
+    border-radius: 14px; border-bottom-left-radius: 4px;
+    box-shadow: 0 6px 20px rgba(0,0,0,.35);
+    opacity: 0; transform: translateY(6px); transition: all .25s;
+    pointer-events: none;
+  }
+  .bubble.show { opacity: 1; transform: translateY(0); }
+
+  /* 粒子 */
+  .particle {
+    position: fixed; z-index: 44; pointer-events: none; font-size: 18px;
+    will-change: transform, opacity;
+  }
+
+  /* 提示条 */
+  .toast {
+    position: fixed; left: 50%; bottom: 76px; transform: translateX(-50%) translateY(10px);
+    background: rgba(0,0,0,.65); color: #fff; font-size: 12.5px;
+    padding: 8px 18px; border-radius: 999px; opacity: 0; transition: all .3s; z-index: 60;
+    border: 1px solid var(--panel-border); pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* 底部提示 */
+  .hint {
+    position: fixed; right: 18px; bottom: 66px; z-index: 25; text-align: right;
+    font-size: 11.5px; color: var(--text-dim); line-height: 1.9; pointer-events: none;
+  }
+  .hint b { color: var(--pink); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+
+<div class="topbar">
+  <img class="logo" src="assets/chibi.png" alt="">
+  <div>
+    <div class="title">柒葱桌宠 <span style="font-size:12px;color:var(--text-dim)">· 网页试玩版</span></div>
+    <div class="sub">桌面版完整体验请下载 Release 中的 qicong-pet.exe</div>
+  </div>
+  <div class="spacer"></div>
+  <a class="github" href="https://github.com/chenqicong528/qicong-pet" target="_blank">GitHub ↗</a>
+</div>
+
+<!-- 养成面板 -->
+<div class="panel">
+  <div class="lv-row">
+    <span class="lv" id="lv">Lv.1</span>
+    <span class="name">柒葱</span>
+    <span class="aff" id="aff">❤ 好感 0</span>
+  </div>
+  <div class="exp-bar"><i id="exp"></i></div>
+  <div class="stat"><div class="row"><span>🍜 饱食度</span><b id="v-hunger">80</b></div><div class="bar hunger"><i id="b-hunger"></i></div></div>
+  <div class="stat"><div class="row"><span>💗 心情</span><b id="v-mood">80</b></div><div class="bar mood"><i id="b-mood"></i></div></div>
+  <div class="stat"><div class="row"><span>🫧 清洁</span><b id="v-hyg">85</b></div><div class="bar hyg"><i id="b-hyg"></i></div></div>
+  <div class="stat" style="margin-bottom:0"><div class="row"><span>💚 健康</span><b id="v-health">95</b></div><div class="bar health"><i id="b-health"></i></div></div>
+</div>
+
+<!-- 操作按钮 -->
+<div class="actions">
+  <div class="row">
+    <button class="btn" id="btn-feed">🍜 喂食</button>
+    <button class="btn" id="btn-play">🎾 玩耍</button>
+    <button class="btn" id="btn-sleep">😴 睡觉</button>
+    <button class="btn" id="btn-bath">🛁 洗澡</button>
+  </div>
+  <div class="food-pop" id="food-pop">
+    <span class="food" data-food="dango" title="团子">🍡</span>
+    <span class="food" data-food="cookie" title="曲奇">🍪</span>
+    <span class="food" data-food="bento" title="便当">🍱</span>
+  </div>
+  <div class="row">
+    <button class="btn" id="btn-skin"> cosplay 换装</button>
+    <button class="btn" id="btn-size">🔍 大小</button>
+    <button class="btn" id="btn-bye">👋 再见</button>
+  </div>
+  <div class="skins" id="skins-pop">
+    <span class="skin-dot default active" data-skin="" title="默认立绘"></span>
+    <span class="skin-dot" data-skin="skin_spring" style="background:#e8b4b8" title="春节"></span>
+    <span class="skin-dot" data-skin="skin_lantern" style="background:#e8916b" title="元宵"></span>
+    <span class="skin-dot" data-skin="skin_valentine" style="background:#e87a9a" title="情人节"></span>
+    <span class="skin-dot" data-skin="skin_qixi" style="background:#b87ae8" title="七夕"></span>
+    <span class="skin-dot" data-skin="skin_midautumn" style="background:#e8c87a" title="中秋"></span>
+    <span class="skin-dot" data-skin="skin_halloween" style="background:#a86be8" title="万圣节"></span>
+    <span class="skin-dot" data-skin="skin_christmas" style="background:#7ab8e8" title="圣诞"></span>
+    <span class="skin-dot" data-skin="skin_new_year" style="background:#e86b6b" title="新年"></span>
+  </div>
+</div>
+
+<div class="hint">
+  <b>拖拽</b> 抛掷 · <b>单击</b> 摸头<br>
+  <b>滚轮</b> 调大小 · 数值会随时间下降
+</div>
+
+<div class="taskbar">
+  <div class="tb-start"> ⊞ </div>
+  <div class="tb-icons"><span>📁</span><span>🌐</span><span>📝</span><span>🐱</span></div>
+  <div class="tb-clock"><b id="clock-t">--:--</b><br><span id="clock-d">----年-月-日</span></div>
+</div>
+
+<div class="bubble" id="bubble"></div>
+<div class="toast" id="toast"></div>
+
+<div id="pet"><img id="pet-img" src="assets/idle.png" alt="柒葱"></div>
+
+<script>
+"use strict";
+/* ================= 台词库（摘自桌面版 pet.py） ================= */
+const LINES = {
+  greet: ["嗨~ 我是柒葱，今天也请多指教喵！", "你回来啦！网页里的我也一直在等你哦~"],
+  idle: [
+    "喵~ 主人在忙什么呀？", "写代码累了就要摸摸猫耳，这是常识喵！",
+    "耳朵和尾巴才不是装饰呢！", "嘿嘿，你在偷偷看我吧？",
+    "要好好吃饭好好睡觉哦~", "喵呜~ 今天心情不错呢",
+    "浏览器里的我也可以陪你摸鱼哦~", "网页版的我，比想象中轻盈对吧？",
+  ],
+  pet: ["喵呜~ 最喜欢摸头了！", "再摸就赖你一辈子哦~❤️", "呼噜呼噜……", "嘿嘿，手好暖和~"],
+  eat: ["开动啦！喵~", "好好吃！谢谢投喂~", "唔，被看穿了……人家还没吃饱啦"],
+  play: ["耶！一起玩吧！", "接住啦~ 好玩好玩！", "运动完心情超好喵！"],
+  sleep: ["Zzz…… 晚安喵……", "呼…… 呼……（睡着了）"],
+  wake: ["唔…… 睡得真好~", "哈欠…… 我睡醒啦！"],
+  bath: ["泡泡澡，心情舒畅~", "洗得香香的啦！"],
+  drop: ["呜哇！轻点扔啦！", "喵呀！摔得我眼冒星星……", "哼，再摔就不理你了！"],
+  throw: ["哇啊啊——飞起来啦！", "喵！！！放我下来！"],
+  bye: ["拜拜~ 记得常来看我喵！", "要去忙了吗？路上小心哦~"],
+  upgrade: ["升级啦！好耶！", "感觉又变强了一点喵！"],
+  sick: ["唔…… 肚子好饿，没有力气了……", "快喂我东西吃嘛……"],
+  hungry: ["肚子咕咕叫了……", "好饿好饿，想吃团子……"],
+  drag: ["呜哇——放开我！", "别拎脖子啦喵！"],
+};
+
+/* ================= 预加载素材 ================= */
+const SPRITES = {};
+const IMG_LIST = [
+  "idle","chibi","happy","eat","eat_dango","eat_cookie","eat_bento",
+  "sleep","angry","drag","sick","bath","lick","bye",
+  "peek_left","peek_right","peek_top",
+  "walk_l1","walk_l2","walk_l3","walk_l4","walk_l5","walk_l6",
+  "walk_r1","walk_r2","walk_r3","walk_r4","walk_r5","walk_r6",
+  "skin_spring","skin_new_year","skin_lantern","skin_midautumn",
+  "skin_christmas","skin_halloween","skin_qixi","skin_valentine",
+];
+let loaded = 0;
+const ASPECT = {};   // name -> w/h
+IMG_LIST.forEach(n => {
+  const im = new Image();
+  im.onload = () => { ASPECT[n] = im.width / im.height; loaded++; };
+  im.src = "assets/" + n + ".png";
+  SPRITES[n] = im.src;
+});
+
+/* ================= 状态与存档 ================= */
+const SAVE_KEY = "qicong_pet_web_save_v1";
+let S = {
+  hunger: 80, mood: 80, hyg: 85, health: 95,
+  exp: 0, level: 1, affection: 0,
+  size: 1, skin: "",
+};
+try {
+  const raw = localStorage.getItem(SAVE_KEY);
+  if (raw) S = Object.assign(S, JSON.parse(raw));
+} catch (e) {}
+
+function save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} }
+
+/* ================= DOM ================= */
+const petEl  = document.getElementById("pet");
+const petImg = document.getElementById("pet-img");
+const bubble = document.getElementById("bubble");
+const toastEl = document.getElementById("toast");
+
+/* ================= 几何 / 物理 ================= */
+const FLOOR_OFFSET = 52;            // 任务栏高度 = 地面
+let W = innerWidth, H = innerHeight;
+addEventListener("resize", () => { W = innerWidth; H = innerHeight; clampPos(); });
+
+const SIZES = { 0: 0.68, 1: 1.0, 2: 1.42 };     // 小 / 中 / 大
+function dispH() { return Math.round(230 * SIZES[S.size]); }
+
+let x = Math.min(W - 220, W * 0.55);   // 中心 x
+let y = H - FLOOR_OFFSET;              // 脚底 y
+let vx = 0, vy = 0;
+const GRAV = 0.55, REST = 0.42, FRICTION = 0.82;
+
+/* ================= 状态机 ================= */
+let state = "idle";        // idle walk eat happy sleep bath sick drag bye peek
+let stateLeft = 0;         // 当前状态剩余秒
+let animFrame = 0, animTimer = 0;
+let walkDir = 1, walkTarget = null;
+let idleT = 0;
+let skin = S.skin || "";
+let pendingAction = null;  // 换装期间临时动作完成后回 idle
+
+function setState(name, seconds) {
+  state = name;
+  stateLeft = seconds || 0;
+  animFrame = 0; animTimer = 0;
+  petEl.classList.remove("wobble");
+}
+
+/* ================= 立绘 key ================= */
+function spriteKey() {
+  const sk = skin || null;
+  switch (state) {
+    case "walk":  return (walkDir < 0 ? "walk_l" : "walk_r") + (Math.floor(animFrame) % 6 + 1);
+    case "eat":   return "eat_" + pendingAction;
+    case "happy": return "happy";
+    case "sleep": return "sleep";
+    case "bath":  return "bath";
+    case "sick":  return "sick";
+    case "bye":   return "bye";
+    case "drag":  return "drag";
+    case "peek":  return "peek_" + pendingAction;   // left / right / top
+    default:
+      return sk ? sk : "idle";
+  }
+}
+/* 皮肤模式下，walk 也用皮肤立绘（原地滑动代替走路帧） */
+const SKIN_WALK = true;
+
+/* ================= 渲染 ================= */
+let wobbleT = 0;
+function render(dt) {
+  const h = dispH();
+  const key = spriteKey();
+  const src = SPRITES[key] || SPRITES.idle;
+  if (petImg.src.indexOf(key) === -1 || !petImg.src.endsWith(key + ".png")) {
+    /* 直接比较文件名，避免多余重载 */
+    if (!petImg.src.endsWith("/" + key + ".png")) petImg.src = src;
+  }
+  petImg.style.height = h + "px";
+  /* 呼吸浮动（idle 时轻微起伏） */
+  let lift = 0, rot = 0;
+  if (state === "idle") lift = Math.sin(performance.now() / 520) * 2.2;
+  if (state === "drag") rot = Math.sin(performance.now() / 260) * 3;
+  petEl.style.transform = `translate(${x}px, ${y + lift}px)`;
+  petImg.style.filter = rot ? `rotate(${rot}deg)` : "";
+  petImg.style.transform = `translate(-50%,-100%) ${rot ? "" : ""}`;
+}
+
+/* 气泡 */
+let bubbleTimer = null;
+function say(text, life) {
+  bubble.textContent = text;
+  bubble.classList.add("show");
+  const h = dispH();
+  bubble.style.left = Math.min(W - 260, Math.max(8, x - 60)) + "px";
+  bubble.style.top = (y - h - 62) + "px";
+  clearTimeout(bubbleTimer);
+  bubbleTimer = setTimeout(() => bubble.classList.remove("show"), (life || 3) * 1000);
+}
+let toastTimer = null;
+function toast(text) {
+  toastEl.textContent = text;
+  toastEl.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove("show"), 1800);
+}
+
+/* ================= 粒子 ================= */
+const particles = [];
+function spawnParticle(char, px, py, opt) {
+  opt = opt || {};
+  const el = document.createElement("div");
+  el.className = "particle";
+  el.textContent = char;
+  el.style.fontSize = (opt.size || 18) + "px";
+  document.body.appendChild(el);
+  particles.push({
+    el, x: px, y: py,
+    vx: opt.vx || (Math.random() - 0.5) * 30,
+    vy: opt.vy != null ? opt.vy : -60,
+    life: opt.life || 1.4, t: 0,
+  });
+}
+function tickParticles(dt) {
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.t += dt;
+    if (p.t >= p.life) { p.el.remove(); particles.splice(i, 1); continue; }
+    p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 30 * dt;
+    p.el.style.transform = `translate(${p.x}px,${p.y}px)`;
+    p.el.style.opacity = String(Math.max(0, 1 - p.t / p.life));
+  }
+}
+function hearts() {
+  for (let i = 0; i < 5; i++) {
+    setTimeout(() => spawnParticle("❤", x + (Math.random() - .5) * 60, y - dispH() * .75, { vy: -80, size: 14 + Math.random() * 10 }), i * 90);
+  }
+}
+function sparkles() {
+  for (let i = 0; i < 10; i++) {
+    setTimeout(() => spawnParticle("✨", x + (Math.random() - .5) * 100, y - dispH() * Math.random(), { vy: -90, size: 12 + Math.random() * 12 }), i * 60);
+  }
+}
+
+/* ================= 养成数值 ================= */
+const $ = id => document.getElementById(id);
+function refreshPanel() {
+  $("lv").textContent = "Lv." + S.level;
+  $("aff").textContent = "❤ 好感 " + S.affection;
+  $("exp").style.width = Math.min(100, S.exp / (S.level * 100) * 100) + "%";
+  [["hunger"],["mood"],["hyg"],["health"]].forEach(([k]) => {
+    $("v-" + k).textContent = Math.round(S[k]);
+    $("b-" + k).style.width = Math.max(0, Math.min(100, S[k])) + "%";
+  });
+}
+function gainExp(n) {
+  S.exp += n;
+  while (S.exp >= S.level * 100) {
+    S.exp -= S.level * 100;
+    S.level++;
+    sparkles(); say(LINES.upgrade[Math.random() * LINES.upgrade.length | 0], 3);
+  }
+  save(); refreshPanel();
+}
+function decay(dt) {
+  S.hunger = Math.max(0, S.hunger - dt * 0.25);
+  S.mood   = Math.max(0, S.mood - dt * 0.18);
+  S.hyg    = Math.max(0, S.hyg - dt * 0.12);
+  if (S.hunger < 12 || S.hyg < 10) S.health = Math.max(0, S.health - dt * 0.35);
+  else if (S.hunger > 40 && S.health < 100) S.health = Math.min(100, S.health + dt * 0.1);
+  if (S.health < 25 && state !== "sick" && state !== "sleep" && state !== "drag") {
+    setState("sick", 0); say(LINES.sick[Math.random() * LINES.sick.length | 0], 3.5);
+  }
+  refreshPanel();
+}
+setInterval(() => { decay(1); save(); }, 1000);
+
+/* ================= 行为动作 ================= */
+const FOOD = {
+  dango:  { sprite: "eat_dango",  add: 18, char: "🍡" },
+  cookie: { sprite: "eat_cookie", add: 14, char: "🍪" },
+  bento:  { sprite: "eat_bento",  add: 26, char: "🍱" },
+};
+function doFeed(kind) {
+  const f = FOOD[kind]; if (!f) return;
+  if (S.hunger >= 99) { say("吃不下啦，饱着呢~", 2.5); return; }
+  spawnParticle(f.char, x, y - dispH() * .55, { vy: -50 });
+  pendingAction = kind;
+  setState("eat", 2.2);
+  S.hunger = Math.min(100, S.hunger + f.add);
+  S.health = Math.min(100, S.health + 3);
+  gainExp(12); S.affection += 2; refreshPanel(); save();
+  say(LINES.eat[Math.random() * LINES.eat.length | 0], 2.6);
+}
+function doPlay() {
+  if (S.mood >= 99) { say("已经超开心了喵~", 2.2); return; }
+  setState("happy", 2.4);
+  S.mood = Math.min(100, S.mood + 20);
+  S.hunger = Math.max(0, S.hunger - 3);
+  gainExp(10); S.affection += 3; refreshPanel(); save();
+  for (let i = 0; i < 4; i++) setTimeout(() => spawnParticle("⭐", x + (Math.random() - .5) * 80, y - dispH() * .6, { vy: -70 }), i * 100);
+  say(LINES.play[Math.random() * LINES.play.length | 0], 2.6);
+}
+function doSleep() {
+  if (state === "sleep") {
+    setState("idle", 0); say(LINES.wake[Math.random() * LINES.wake.length | 0], 2.6);
+    return;
+  }
+  setState("sleep", 0);
+  say(LINES.sleep[Math.random() * LINES.sleep.length | 0], 3);
+}
+function doBath() {
+  if (S.hyg >= 98) { say("已经很干净啦~", 2.2); return; }
+  setState("bath", 2.6);
+  S.hyg = 100;
+  gainExp(8); refreshPanel(); save();
+  for (let i = 0; i < 6; i++) setTimeout(() => spawnParticle("🫧", x + (Math.random() - .5) * 90, y - dispH() * (.3 + Math.random() * .5), { vy: -55 }), i * 110);
+  say(LINES.bath[Math.random() * LINES.bath.length | 0], 2.6);
+}
+
+/* ================= 交互：拖拽 / 摸头 / 滚轮 ================= */
+let dragging = false, dragMoved = false, lastMX = 0, lastMY = 0, vxHist = [], lastClickT = 0;
+
+petEl.addEventListener("pointerdown", e => {
+  e.preventDefault();
+  petEl.setPointerCapture(e.pointerId);
+  dragging = true; dragMoved = false;
+  lastMX = e.clientX; lastMY = e.clientY;
+  vxHist = [];
+  if (state !== "sick") setState("drag", 0);
+  petEl.classList.add("dragging");
+  if (Math.random() < .35) say(LINES.drag[Math.random() * LINES.drag.length | 0], 2);
+});
+addEventListener("pointermove", e => {
+  if (!dragging) return;
+  const dx = e.clientX - lastMX, dy = e.clientY - lastMY;
+  if (Math.abs(dx) + Math.abs(dy) > 4) dragMoved = true;
+  x += dx; y += dy;
+  lastMX = e.clientX; lastMY = e.clientY;
+  vxHist.push([dx / 0.016, dy / 0.016]);
+  if (vxHist.length > 5) vxHist.shift();
+});
+addEventListener("pointerup", e => {
+  if (!dragging) return;
+  dragging = false;
+  petEl.classList.remove("dragging");
+  if (dragMoved) {
+    /* 抛掷：取最近速度均值 */
+    let sx = 0, sy = 0;
+    vxHist.forEach(v => { sx += v[0]; sy += v[1]; });
+    const n = Math.max(1, vxHist.length);
+    vx = Math.max(-28, Math.min(28, sx / n));
+    vy = Math.max(-34, Math.min(30, sy / n));
+    if (vy < -6) say(LINES.throw[Math.random() * LINES.throw.length | 0], 2);
+  } else {
+    /* 单击 = 摸头 */
+    const now = Date.now();
+    const isDouble = now - lastClickT < 320;
+    lastClickT = now;
+    S.mood = Math.min(100, S.mood + 4);
+    S.affection += 1;
+    gainExp(4); refreshPanel(); save();
+    hearts();
+    petEl.classList.remove("wobble"); void petEl.offsetWidth; petEl.classList.add("wobble");
+    if (isDouble) { say("再摸就赖你一辈子哦~❤️", 3); S.affection += 5; }
+    else say(LINES.pet[Math.random() * LINES.pet.length | 0], 2.4);
+    if (state === "drag" || state === "idle") setState("idle", 0);
+  }
+  clampPos();
+});
+addEventListener("wheel", e => {
+  if (e.target.closest(".panel") || e.target.closest(".actions")) return;
+  S.size = e.deltaY < 0 ? Math.min(2, S.size + 1) : Math.max(0, S.size - 1);
+  save(); toast("大小：" + ["小", "中", "大"][S.size]);
+}, { passive: true });
+
+function clampPos() {
+  const halfW = dispH() * 0.35;
+  x = Math.max(halfW, Math.min(W - halfW, x));
+  y = Math.min(H - FLOOR_OFFSET, y);
+}
+
+/* ================= 按钮 ================= */
+$("btn-feed").onclick = () => {
+  const p = $("food-pop");
+  p.classList.toggle("show");
+  $("skins-pop").classList.remove("show");
+};
+document.querySelectorAll(".food").forEach(el => {
+  el.onclick = () => { $("food-pop").classList.remove("show"); doFeed(el.dataset.food); };
+});
+$("btn-play").onclick = doPlay;
+$("btn-sleep").onclick = doSleep;
+$("btn-bath").onclick = doBath;
+$("btn-bye").onclick = () => {
+  setState("bye", 2.5);
+  say(LINES.bye[Math.random() * LINES.bye.length | 0], 2.5);
+};
+$("btn-skin").onclick = () => {
+  $("skins-pop").classList.toggle("show");
+  $("food-pop").classList.remove("show");
+};
+document.querySelectorAll(".skin-dot").forEach(el => {
+  el.onclick = () => {
+    document.querySelectorAll(".skin-dot").forEach(d => d.classList.remove("active"));
+    el.classList.add("active");
+    skin = el.dataset.skin;
+    S.skin = skin; save();
+    setState("idle", 0);
+    say(skin ? "换上新皮肤啦，好看吗喵~" : "换回原来的样子啦~", 2.6);
+    sparkles();
+  };
+});
+$("btn-size").onclick = () => {
+  S.size = (S.size + 1) % 3;
+  save(); toast("大小：" + ["小", "中", "大"][S.size]);
+};
+
+/* ================= AI 行为 ================= */
+function aiTick(dt) {
+  if (dragging || state === "drag") return;
+
+  if (state === "sleep") {          // 睡觉：数值缓慢恢复
+    S.hunger = Math.max(0, S.hunger - dt * .08);
+    S.mood = Math.min(100, S.mood + dt * .3);
+    S.health = Math.min(100, S.health + dt * .5);
+    if (Math.random() < dt * .8) spawnParticle("Z", x + dispH() * .18, y - dispH() * .9, { vy: -40, size: 14 });
+    refreshPanel();
+    return;
+  }
+  if (["eat","happy","bath","bye","sick","peek"].includes(state)) {
+    if (stateLeft > 0) {
+      stateLeft -= dt;
+      if (stateLeft <= 0) setState(pendingAction === "peek" ? "idle" : "idle", 0), pendingAction = null;
+    }
+    return;
+  }
+
+  /* idle / walk */
+  idleT -= dt;
+  if (state === "idle" && idleT <= 0) {
+    const r = Math.random();
+    if (r < .45) {                     // 出门散步
+      state = "walk";
+      walkDir = Math.random() < .5 ? -1 : 1;
+      walkTarget = clampX(x + walkDir * (160 + Math.random() * 420));
+      idleT = 4 + Math.random() * 5;
+    } else if (r < .58) {              // 随机台词
+      say(LINES.idle[Math.random() * LINES.idle.length | 0], 3);
+      idleT = 6 + Math.random() * 8;
+    } else {
+      idleT = 3 + Math.random() * 4;
+    }
+  }
+  if (state === "walk") {
+    x += walkDir * dt * 62 * SIZES[S.size];
+    animTimer += dt;
+    if (animTimer > .12) { animTimer = 0; animFrame++; }
+    /* 到目标或到边缘 */
+    if ((walkDir > 0 && x >= walkTarget) || (walkDir < 0 && x <= walkTarget)) {
+      if (x <= dispH() * .4 + 6 && Math.random() < .5) {       // 左边缘探头
+        pendingAction = "left";  setState("peek", 2.2);
+      } else if (x >= W - dispH() * .4 - 6 && Math.random() < .5) {
+        pendingAction = "right"; setState("peek", 2.2);
+      } else state = "idle";
+    }
+  }
+  /* 饿了主动提醒 */
+  if (S.hunger < 22 && Math.random() < dt * .12) {
+    say(LINES.hungry[Math.random() * LINES.hungry.length | 0], 3);
+  }
+}
+function clampX(v) { const hw = dispH() * .35; return Math.max(hw, Math.min(W - hw, v)); }
+
+/* ================= 物理 ================= */
+function physTick(dt) {
+  const floor = H - FLOOR_OFFSET;
+  if (dragging || state === "drag") return;
+  if (vx === 0 && vy === 0) return;
+  /* 只在抛掷后（有速度）应用自由落体 */
+  vy += GRAV * 60 * dt;
+  x += vx * 60 * dt;
+  y += vy * 60 * dt;
+  const halfW = dispH() * .35;
+  if (x < halfW) { x = halfW; vx = -vx * .5; }
+  if (x > W - halfW) { x = W - halfW; vx = -vx * .5; }
+  if (y >= floor) {
+    y = floor;
+    if (Math.abs(vy) > 3) {
+      vy = -vy * REST; vx *= FRICTION;
+      if (Math.abs(vy) < 4) { vy = 0; vx = 0; setState("idle", 0); }
+      else if (Math.abs(vy) > 9) spawnParticle("💢", x, y - 10, { vy: -40, size: 16 });
+    } else { vy = 0; vx = 0; setState("idle", 0); }
+  }
+}
+
+/* ================= 时钟 / 星星 ================= */
+function tickClock() {
+  const d = new Date();
+  const p = n => String(n).padStart(2, "0");
+  $("clock-t").textContent = p(d.getHours()) + ":" + p(d.getMinutes());
+  $("clock-d").textContent = d.getFullYear() + "年" + (d.getMonth() + 1) + "月" + d.getDate() + "日";
+}
+setInterval(tickClock, 1000); tickClock();
+(function makeStars() {
+  const box = $("stars");
+  for (let i = 0; i < 60; i++) {
+    const s = document.createElement("i");
+    s.className = "star";
+    const sz = Math.random() * 2 + 1;
+    s.style.cssText = `left:${Math.random() * 100}%;top:${Math.random() * 90}%;width:${sz}px;height:${sz}px;animation-delay:${Math.random() * 3}s`;
+    box.appendChild(s);
+  }
+})();
+
+/* ================= 主循环 ================= */
+let lastT = performance.now();
+function loop(now) {
+  const dt = Math.min(.05, (now - lastT) / 1000);
+  lastT = now;
+  aiTick(dt);
+  physTick(dt);
+  tickParticles(dt);
+  render(dt);
+  requestAnimationFrame(loop);
+}
+
+/* ================= 启动 ================= */
+refreshPanel();
+setState("idle", 0);
+setTimeout(() => say(LINES.greet[Math.random() * LINES.greet.length | 0], 4), 800);
+setTimeout(() => toast("欢迎来到柒葱桌宠网页试玩版 🎉"), 300);
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

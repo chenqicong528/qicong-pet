@@ -1,0 +1,30 @@
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+.venv/
+venv/
+
+# ===== 打包产物 =====
+build/
+dist/
+release/
+*.spec
+
+# ===== 运行时数据（含个人数据，勿提交） =====
+pet_save.json
+mods/*/config.json
+
+# ===== 离线依赖 wheel 包（体积大，可用 tools/fetch_wheels.py 重新生成） =====
+tools/wheels/
+
+# ===== 调试 / 生成素材 =====
+generated-images/
+
+# ===== 编辑器 / 系统 =====
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
