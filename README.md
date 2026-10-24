@@ -2,10 +2,13 @@
 
 > 一只常驻 Windows 桌面的桌面宠物，站在任务栏上陪你写代码、摸鱼、发呆。
 
+[![在线试玩](https://img.shields.io/badge/在线试玩-GitHub%20Pages-ff69b4)](https://chenqicong528.github.io/qicong-pet/)
 [![Python](https://img.shields.io/badge/Python-3.9%2B-blue)](https://www.python.org/)
 [![PySide6](https://img.shields.io/badge/GUI-PySide6%20(Qt6)-41cd52)](https://pypi.org/project/PySide6/)
 [![Version](https://img.shields.io/badge/Version-1.6.2-orange)]()
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
+
+> 🎮 **在线试玩**：https://chenqicong528.github.io/qicong-pet/ （网页版桌宠，可直接在浏览器里拖拽、喂食、摸头、换装）
 
 **柒葱**是一个透明、置顶、无边框的小窗口看板娘。她会散步、眨耳、发呆、说话，可以被**拖拽抛掷**（带重力掉落与弹跳）、**双击摸头**、**滚轮换大小**；内置 QQ 宠物式的养成数值、24 节气 + 节日皮肤、音乐节奏灯、桌面便签、番茄钟、任务栏系统监控面板，以及一套**可热加载的模组（Mod）系统**。纯 Python + PySide6 实现，可一键打包为单文件 exe。
 
